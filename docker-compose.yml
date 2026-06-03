@@ -1,0 +1,34 @@
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    command: python -m src.main
+    environment:
+      - REDIS_HOST=redis
+      - EXPOSE_PORT=12104
+    depends_on:
+      - redis
+    ports:
+      - "12104:12104"
+
+  worker:
+    build: .
+    command: python -m src.worker
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+
+  dashboard:
+    image: eoranged/rq-dashboard
+    platform: linux/amd64
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379
+    ports:
+      - "9181:9181"
+    depends_on:
+      - redis

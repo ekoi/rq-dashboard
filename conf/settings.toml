@@ -1,0 +1,2 @@
+[default]
+log_file = "@format {env[BASE_DIR]}/logs/rqf.log"

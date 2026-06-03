@@ -1,0 +1,15 @@
+[project]
+name = "rq-dasboard"
+version = "0.1.0"
+description = "The RQ Dashboard is a web-based interface for monitoring and managing RQ (Redis Queue) workers and jobs. It provides real-time insights into the status of your RQ workers, the jobs they are processing, and any errors that may occur. With the RQ Dashboard, you can easily track the progress of your background tasks, view job details, and manage your RQ workers efficiently."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dynaconf>=3.2.13",
+    "fastapi>=0.136.0",
+    "redis>=7.4.0",
+    "rq>=2.8.0",
+    "rq-dashboard>=0.8.6",
+    "tomli>=2.4.1",
+    "uvicorn>=0.45.0",
+]
