@@ -4,6 +4,12 @@
 
 Run the FastAPI app directly from `src/main.py` (Uvicorn is started by the script).
 
+PyCharm run/debug (Script path):
+
+- Script path: `src/main.py`
+- Working directory: project root (`rq-dashboard`)
+- Optional env: `EXPOSE_PORT=12104`
+
 ```zsh
 cd /Users/akmi/dev/work/datacommons/rq-dashboard
 python -u src/main.py

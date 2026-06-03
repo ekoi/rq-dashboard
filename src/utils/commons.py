@@ -1,10 +1,12 @@
 import os
+from pathlib import Path
 
 import tomli
 from dynaconf import Dynaconf
 
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.environ.setdefault("BASE_DIR", project_root)
+project_root = str(Path(__file__).resolve().parents[2])
+if "BASE_DIR" not in os.environ:
+    os.environ["BASE_DIR"] = project_root
 
 try:
     app_settings = Dynaconf(

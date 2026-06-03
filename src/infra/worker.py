@@ -12,3 +12,4 @@ redis_conn = redis.Redis(
 if __name__ == '__main__':
     worker = Worker(listen, connection=redis_conn)
     worker.work()
+

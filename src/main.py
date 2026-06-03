@@ -1,19 +1,17 @@
 import os
 import uvicorn
 
-import redis
 from fastapi import FastAPI
-from rq import Queue
 
 try:
-    from src.commons import app_settings, get_project_details
+    from src.utils.commons import app_settings, get_project_details
 except ModuleNotFoundError:
-    from commons import app_settings, get_project_details
+    from utils.commons import app_settings, get_project_details
 
 try:
-    from src.task import long_task
+    from src.api.v1.task_routes import router as v1_router
 except ModuleNotFoundError:
-    from task import long_task
+    from api.v1.task_routes import router as v1_router
 APP_NAME = os.environ.get("APP_NAME", "RQ + FastAPI Service")
 
 project_details = get_project_details(
@@ -50,31 +48,7 @@ logging.basicConfig(
     handlers=[handler]
 )
 app = FastAPI(title=APP_TITLE, description=APP_DESCRIPTION, version=APP_VERSION)
-
-redis_conn = redis.Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", "6379")),
-)
-q = Queue(connection=redis_conn)
-
-@app.get("/")
-def root():
-    return {"message": "RQ + FastAPI running"}
-
-@app.post("/task")
-def run_task(x: int, y: int):
-    job = q.enqueue(long_task, x, y)
-    return {"job_id": job.id}
-
-@app.get("/result/{job_id}")
-def get_result(job_id: str):
-    job = q.fetch_job(job_id)
-    if job is None:
-        return {"status": "not found"}
-    return {
-        "status": job.get_status(),
-        "result": job.return_value
-    }
+app.include_router(v1_router)
 
 
 if __name__ == "__main__":
