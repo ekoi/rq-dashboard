@@ -4,6 +4,11 @@ import time
 from importlib import import_module
 from pathlib import Path
 
+try:
+  from src.utils.commons import app_settings
+except ModuleNotFoundError:
+  from utils.commons import app_settings
+
 
 def long_task(x, y):
   time.sleep(5)
@@ -14,8 +19,12 @@ def _ensure_harvester_on_path():
   """Make an optional harvester package importable for HAL harvest jobs."""
   harvester_src = os.getenv(
     "HARVESTER_SRC",
-    "/Users/akmi/dev/work/datacommons/toolmeta-harvester0601/src",
+    app_settings.get("HARVESTER_SRC") if app_settings else None,
   )
+  if not harvester_src:
+    raise RuntimeError(
+      "HARVESTER_SRC is not configured. Set it in conf/settings.toml or as an environment variable."
+    )
   src_path = str(Path(harvester_src).resolve())
   if src_path not in sys.path:
     sys.path.insert(0, src_path)
