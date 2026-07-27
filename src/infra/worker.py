@@ -10,6 +10,7 @@ redis_conn = redis.Redis(
 )
 
 if __name__ == '__main__':
-    worker = Worker(listen, connection=redis_conn)
+    # Keep finished/failed job results for 24 hours so the dashboard can display them.
+    worker = Worker(listen, connection=redis_conn, default_result_ttl=86400)
     worker.work()
 

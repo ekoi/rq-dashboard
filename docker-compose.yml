@@ -4,31 +4,65 @@ services:
     ports:
       - "6379:6379"
 
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=${TM_DB_NAME:-toolsdb}
+      - POSTGRES_USER=${TM_DB_USER:-toolsadmin}
+      - POSTGRES_PASSWORD=${TM_DB_PASSWORD:-yoursecretsecret}
+    expose:
+      - "5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
   api:
     build: .
     command: python -m src.main
     environment:
       - REDIS_HOST=redis
       - EXPOSE_PORT=12104
+      - HARVESTER_SRC=/harvester/src
+      - TOOL_REGISTRY_DATABASE__HOST=postgres
+      - TOOL_REGISTRY_DATABASE__PORT=5432
+      - TOOL_REGISTRY_DATABASE__NAME=${TM_DB_NAME:-toolsdb}
+      - TOOL_REGISTRY_DATABASE__USER=${TM_DB_USER:-toolsadmin}
+      - TOOL_REGISTRY_DATABASE__PASSWORD=${TM_DB_PASSWORD:-yoursecretsecret}
     depends_on:
       - redis
+      - postgres
     ports:
       - "12104:12104"
+    volumes:
+      - ${HARVESTER_DIR:-../toolmeta-harvester0601}:/harvester
+      - ${HARVESTER_DIR:-../toolmeta-harvester0601}/config:/code/config:ro
 
   worker:
     build: .
     command: python -m src.infra.worker
     environment:
       - REDIS_HOST=redis
+      - HARVESTER_SRC=/harvester/src
+      - TOOL_REGISTRY_DATABASE__HOST=postgres
+      - TOOL_REGISTRY_DATABASE__PORT=5432
+      - TOOL_REGISTRY_DATABASE__NAME=${TM_DB_NAME:-toolsdb}
+      - TOOL_REGISTRY_DATABASE__USER=${TM_DB_USER:-toolsadmin}
+      - TOOL_REGISTRY_DATABASE__PASSWORD=${TM_DB_PASSWORD:-yoursecretsecret}
     depends_on:
       - redis
+      - postgres
+    volumes:
+      - ${HARVESTER_DIR:-../toolmeta-harvester0601}:/harvester
+      - ${HARVESTER_DIR:-../toolmeta-harvester0601}/config:/code/config:ro
 
   dashboard:
-    image: eoranged/rq-dashboard
-    platform: linux/amd64
+    build: .
+    command: rq-dashboard --redis-url redis://redis:6379 --bind 0.0.0.0 --port 9181
     environment:
-      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
     ports:
       - "9181:9181"
     depends_on:
       - redis
+
+volumes:
+  postgres-data:

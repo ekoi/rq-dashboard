@@ -36,6 +36,29 @@ cd /Users/akmi/dev/work/datacommons/rq-dashboard
 docker compose up --build -d
 ```
 
+## Trigger and watch a HAL harvest
+
+The helper script submits a HAL harvest job and polls until it finishes:
+
+```zsh
+cd /Users/akmi/dev/work/datacommons/rq-dashboard
+python scripts/harvest_hal_watch.py --base-url http://localhost:12104 --detail
+```
+
+Watch an existing job instead:
+
+```zsh
+cd /Users/akmi/dev/work/datacommons/rq-dashboard
+python scripts/harvest_hal_watch.py --job-id <job-id> --watch-only --detail
+```
+
+If the RQ Dashboard ever shows a stale loading page again, check and remove orphaned
+entries from Redis:
+
+```zsh
+HARVESTER_DIR=../toolmeta0719 docker compose exec redis redis-cli ZRANGE rq:wip:default 0 -1
+```
+
 Endpoints:
 
 - API: `http://localhost:12104/`
